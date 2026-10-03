@@ -123,7 +123,7 @@ internal static class AfkConfig
         IgnoreEnemyDamage = config.Bind(
             "4 - Effects",
             "IgnoreEnemyDamage",
-            false,
+            true,
             "While the AFK status is active, hits whose attacker is a creature (greydwarf, "
                 + "troll, boss...) deal no damage at all, so you cannot "
                 + "be killed while AFK. Damage from other players and from the environment "

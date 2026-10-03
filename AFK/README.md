@@ -17,7 +17,7 @@ While the status is active its effects apply (each one is a config toggle):
 - **InvisibleToEnemies** (default on): creatures cannot see, hear or target you - the same
   checks the vanilla `ghost` command passes, but synchronized through your player ZDO, so
   it also works against the creature AI owned by a dedicated server or another client.
-- **IgnoreEnemyDamage** (default off): hits from creatures deal no damage at all, so
+- **IgnoreEnemyDamage** (default on): hits from creatures deal no damage at all, so
   nothing can kill you while AFK. Damage from other players and from the environment still
   goes through.
 
@@ -50,7 +50,7 @@ announced by a short message in the top left corner (`Notify`).
 | 3 - Conditions | SecondsSinceDamageDealt | 60 | Quiet time since your last hit on an enemy (5-60 s). |
 | 3 - Conditions | SecondsSinceAggro | 30 | Quiet time since an alerted enemy last targeted you, or since a character hit you (5-60 s). |
 | 4 - Effects | InvisibleToEnemies | true | Creatures cannot see, hear or target you (synced). |
-| 4 - Effects | IgnoreEnemyDamage | false | Creature attacks deal no damage while AFK. |
+| 4 - Effects | IgnoreEnemyDamage | true | Creature attacks deal no damage while AFK. |
 | 5 - Display | IndicatorEnabled | true | Persistent message in the top center while AFK; gone when the status is released. |
 | 5 - Display | IndicatorShowWaiting | true | Also show "AFK: waiting - … (12s)" with a live countdown in that same spot while the request waits. |
 | 5 - Display | IndicatorText | AFK | Text of that message (empty = off). |
