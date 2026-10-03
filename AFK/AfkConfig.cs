@@ -39,9 +39,15 @@ internal static class AfkConfig
 
     internal static ConfigEntry<string> IndicatorColor = null!;
 
+    internal static ConfigEntry<KeyboardShortcut> IndicatorColorKey = null!;
+
+    private static ConfigFile? s_config;
+
     /// <summary>Binds every setting to the config file. Called once, from AFK.Awake.</summary>
     internal static void Bind(ConfigFile config)
     {
+        s_config = config;
+
         Enabled = config.Bind(
             "1 - General",
             "Enabled",
@@ -149,7 +155,22 @@ internal static class AfkConfig
             "IndicatorColor",
             "#FFFFFFFF",
             "Color of the persistent message as HTML hex: #RRGGBB or #RRGGBBAA "
-                + "(the last two digits set the opacity). Invalid values fall back to white."
+                + "(the last two digits set the opacity). Invalid values fall back to white. "
+                + "Press IndicatorColorKey to pick it interactively."
+        );
+
+        IndicatorColorKey = config.Bind(
+            "5 - Display",
+            "IndicatorColorKey",
+            new KeyboardShortcut(KeyCode.F9),
+            "Key that opens the Jotunn color picker for IndicatorColor: Done keeps the new "
+                + "color, Cancel restores the previous one, and the result is saved to this "
+                + "setting. Works even while the mod is disabled, but is ignored while "
+                + "typing in chat, the console, a menu or the inventory. Press it again to "
+                + "close the picker."
         );
     }
+
+    /// <summary>Writes the config file to disk (used by the color picker).</summary>
+    internal static void Save() => s_config?.Save();
 }

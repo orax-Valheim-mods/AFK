@@ -21,8 +21,10 @@ While the status is active its effects apply (each one is a config toggle):
 
 On top of that, a **persistent message** (default "AFK", configurable text / size / color)
 is displayed in the top center of the screen **for as long as the status lasts** - it
-disappears the moment the status is released. The short top left messages announcing each
-transition are controlled separately by `Notify`.
+disappears the moment the status is released. Press **F9** (`IndicatorColorKey`) to choose
+its color with Jotunn's interactive color picker: *Done* keeps the new color, *Cancel*
+restores the previous one (the setting is saved to the config file). The short top left
+messages announcing each transition are controlled separately by `Notify`.
 
 Request the status whenever you want: if the quiet conditions don't hold yet (you just
 finished a fight), a "waiting" message shows what is missing and for how long, and the
@@ -49,10 +51,12 @@ announced by a short message in the top left corner (`Notify`).
 | 5 - Display | IndicatorText | AFK | Text of that message (empty = off). |
 | 5 - Display | IndicatorFontSize | 40 | Font size of the message (clamped 8-200). |
 | 5 - Display | IndicatorColor | #FFFFFFFF | Color of the message, HTML hex `#RRGGBB` / `#RRGGBBAA`. |
+| 5 - Display | IndicatorColorKey | F9 | Opens the Jotunn color picker to choose `IndicatorColor` (Done saves, Cancel reverts). |
 
 # Installation
 
-Requires BepInExPack for Valheim.
+Requires BepInExPack for Valheim and [Jotunn](https://valheim-modding.github.io/Jotunn/)
+(hard dependency, provided automatically by mod managers through `manifest.json`).
 
 **Install the mod on your client AND on the dedicated server** (and on other clients that
 may own creature AI near you): creature AI runs on the machine owning the creature - the

@@ -20,11 +20,15 @@ namespace AFK;
 /// state, the effect patches simply never see the flag there for a local player.
 /// </summary>
 [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
+[BepInDependency(JotunnDependencyGUID, BepInDependency.DependencyFlags.HardDependency)]
 internal class AFK : BaseUnityPlugin
 {
     public const string PluginGUID = "orax.AFK";
     public const string PluginName = "AFK";
     public const string PluginVersion = "0.1.0";
+
+    /// <summary>Jotunn - provides the color picker for IndicatorColor.</summary>
+    public const string JotunnDependencyGUID = "com.jotunn.jotunn";
 
     internal static Harmony? PatchHarmony;
 

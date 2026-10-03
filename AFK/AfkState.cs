@@ -98,10 +98,17 @@ internal static class AfkState
         bool notifyRequestChange = false;
         string? message = null;
 
-        // 2) Triggers.
-        if (AfkConfig.Enabled.Value && !player.IsDead() && !IsInputBlocked())
+        // 2) Triggers. The color picker is a settings action: it also works while the mod
+        //    is disabled or the player is dead, but never while a UI takes the input.
+        bool inputBlocked = IsInputBlocked();
+        if (!inputBlocked && PressedShortcut(AfkConfig.IndicatorColorKey.Value))
         {
-            if (PressedToggleKey())
+            AfkColorPicker.Open();
+        }
+
+        if (AfkConfig.Enabled.Value && !player.IsDead() && !inputBlocked)
+        {
+            if (PressedShortcut(AfkConfig.ToggleKey.Value))
             {
                 // The key is an explicit AFK intent: always answer it.
                 SetRequested(!Requested);
@@ -326,9 +333,8 @@ internal static class AfkState
 
     // ------------------------------------------------------------------ input
 
-    private static bool PressedToggleKey()
+    private static bool PressedShortcut(KeyboardShortcut shortcut)
     {
-        KeyboardShortcut shortcut = AfkConfig.ToggleKey.Value;
         if (!ZInput.GetKeyDown(shortcut.MainKey, false))
         {
             return false;
