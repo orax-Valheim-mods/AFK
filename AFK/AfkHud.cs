@@ -1,9 +1,4 @@
 #nullable enable
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using BepInEx;
 using TMPro;
 using UnityEngine;
 
@@ -21,17 +16,13 @@ namespace AFK;
 /// "AFK: waiting - ..." condition message with its live countdown while the request
 /// still waits for the quiet timers.
 ///
-/// The font follows IndicatorFont: empty keeps Valheim's own UI font, a name picks a
-/// TMP font the game already has loaded or, failing that, builds a runtime font from a
-/// system-installed font of that name. Every usable name - the game's fonts and the
-/// fonts installed on this computer - is listed in orax.AFK.Fonts.txt next to the
-/// config file, written once per launch as soon as the HUD exists. The canvas is
-/// created lazily on the first shown frame, survives
-/// scene loads (DontDestroyOnLoad) and is destroyed from AFK.OnDestroy so a hot
+/// The label always uses the game's own UI font. The canvas is created lazily on the
+/// first shown frame, survives scene loads (DontDestroyOnLoad) and is destroyed from
+/// AFK.OnDestroy so a hot
 /// reload (F6) cannot leave an orphan label behind. The whole object is deactivated
 /// whenever neither state applies (AfkState.Active / Requested false).
 ///
-/// The label only writes to TMP when the text, font, size or color actually changed:
+/// The label only writes to TMP when the text, size or color actually changed:
 /// assigning TMP text every frame would rebuild the mesh for nothing.
 /// </summary>
 internal static class AfkHud
@@ -47,20 +38,10 @@ internal static class AfkHud
     private static float s_boxWidth;
     private static Color s_shownColor = new(-1f, -1f, -1f, -1f);
     private static bool s_fontWarningLogged;
-    private static bool s_fontListWritten;
-
-    // Font resolution cache: the trimmed IndicatorFont value last applied (null before
-    // the first resolution), the font it resolved to, and - if a system font had to be
-    // built at runtime - the asset to destroy when the setting changes again.
-    private static string? s_fontQuery;
-    private static TMP_FontAsset? s_font;
-    private static TMP_FontAsset? s_createdFont;
 
     /// <summary>Called once per frame from AFK.Update: show, refresh or hide the message.</summary>
     internal static void Sync()
     {
-        WriteFontListOnce();
-
         string? text = null;
         if (AfkConfig.IndicatorEnabled.Value)
         {
@@ -95,10 +76,6 @@ internal static class AfkHud
         s_boxWidth = 0f;
         s_shownColor = new Color(-1f, -1f, -1f, -1f);
         s_fontWarningLogged = false;
-        s_fontListWritten = false;
-        s_fontQuery = null;
-        s_font = null;
-        s_createdFont = null;
     }
 
     private static void Show(string? text)
@@ -116,9 +93,6 @@ internal static class AfkHud
         {
             return;
         }
-
-        // Re-resolve when IndicatorFont is edited in the configuration UI.
-        ApplyFont();
 
         int fontSize = Mathf.Clamp(AfkConfig.IndicatorFontSize.Value, 8, 200);
         Color color = ParseColor(AfkConfig.IndicatorColor.Value);
@@ -190,8 +164,8 @@ internal static class AfkHud
     /// <summary>Builds the canvas and the label once. False = no font, message stays off.</summary>
     private static bool Create()
     {
-        ApplyFont();
-        if (s_font == null)
+        TMP_FontAsset? font = DefaultFont();
+        if (font == null)
         {
             if (!s_fontWarningLogged)
             {
@@ -210,65 +184,13 @@ internal static class AfkHud
         GameObject labelObject = new GameObject("Text");
         labelObject.transform.SetParent(s_root.transform, false);
         s_label = labelObject.AddComponent<TextMeshProUGUI>();
-        s_label.font = s_font;
+        s_label.font = font;
         s_label.alignment = TextAlignmentOptions.Center;
         s_label.fontStyle = FontStyles.Bold;
         s_label.textWrappingMode = TextWrappingModes.NoWrap;
         s_label.overflowMode = TextOverflowModes.Overflow;
         s_label.raycastTarget = false;
         return true;
-    }
-
-    /// <summary>
-    /// Resolves IndicatorFont when its value changed: empty = the game's own UI font,
-    /// a name = a TMP font the game already loaded, else a system font built at
-    /// runtime, else the game's font with a warning.
-    /// </summary>
-    private static void ApplyFont()
-    {
-        string? raw = AfkConfig.IndicatorFont.Value;
-        string wanted = raw == null ? "" : raw.Trim();
-        if (wanted == s_fontQuery)
-        {
-            return;
-        }
-        s_fontQuery = wanted;
-
-        // A previously built system font must go once something else is used.
-        TMP_FontAsset? oldCreated = s_createdFont;
-        s_createdFont = null;
-
-        TMP_FontAsset? resolved;
-        if (wanted.Length == 0)
-        {
-            resolved = DefaultFont();
-        }
-        else
-        {
-            resolved = FindLoadedFont(wanted) ?? CreateSystemFont(wanted);
-            if (resolved == null)
-            {
-                AFK.LogWarning(
-                    $"Font \"{wanted}\" not found - the indicator keeps the game's own font."
-                );
-                resolved = DefaultFont();
-            }
-        }
-
-        if (oldCreated != null && !ReferenceEquals(oldCreated, resolved))
-        {
-            Object.Destroy(oldCreated);
-        }
-        if (resolved == null)
-        {
-            return;
-        }
-
-        s_font = resolved;
-        if (s_label != null)
-        {
-            s_label.font = resolved;
-        }
     }
 
     /// <summary>Valheim's HUD font while in game, TMP's configured default font otherwise.</summary>
@@ -283,90 +205,6 @@ internal static class AfkHud
             }
         }
         return TMP_Settings.defaultFontAsset;
-    }
-
-    /// <summary>A TMP font asset the game already has loaded, by asset name.</summary>
-    private static TMP_FontAsset? FindLoadedFont(string name)
-    {
-        foreach (TMP_FontAsset asset in Resources.FindObjectsOfTypeAll<TMP_FontAsset>())
-        {
-            if (asset != null && asset.name.Equals(name, System.StringComparison.OrdinalIgnoreCase))
-            {
-                return asset;
-            }
-        }
-        return null;
-    }
-
-    /// <summary>Builds a runtime TMP font from a system-installed font of that name.</summary>
-    private static TMP_FontAsset? CreateSystemFont(string name)
-    {
-        Font osFont = Font.CreateDynamicFontFromOSFont(name, 90);
-        if (osFont == null)
-        {
-            return null;
-        }
-        TMP_FontAsset? created = TMP_FontAsset.CreateFontAsset(osFont);
-        if (created != null)
-        {
-            s_createdFont = created;
-        }
-        return created;
-    }
-
-    /// <summary>
-    /// Writes every font usable with IndicatorFont to a text file next to the config
-    /// file - the game's loaded fonts first, then the fonts installed on this computer -
-    /// once per launch, as soon as the HUD exists so the game's own fonts are in. The
-    /// loaded names also go to the BepInEx log, for discovery.
-    /// </summary>
-    private static void WriteFontListOnce()
-    {
-        if (s_fontListWritten || Hud.instance == null)
-        {
-            return;
-        }
-        s_fontListWritten = true;
-
-        try
-        {
-            List<string> gameFonts = new();
-            foreach (TMP_FontAsset asset in Resources.FindObjectsOfTypeAll<TMP_FontAsset>())
-            {
-                if (asset != null && asset.name.Length > 0)
-                {
-                    gameFonts.Add(asset.name);
-                }
-            }
-            gameFonts.Sort(System.StringComparer.OrdinalIgnoreCase);
-            AFK.LogInfo($"Loaded TMP fonts: {string.Join(", ", gameFonts)}");
-
-            string[] installed = Font.GetOSInstalledFontNames() ?? new string[0];
-            List<string> systemFonts = new(installed);
-            systemFonts.Sort(System.StringComparer.OrdinalIgnoreCase);
-
-            string path = Path.Combine(Paths.ConfigPath, AFK.PluginGUID + ".Fonts.txt");
-            List<string> lines =
-                new()
-                {
-                    "# Fonts usable with IndicatorFont - written by the AFK mod each time it loads.",
-                    "# Set IndicatorFont to one of these names, or leave it empty for the game's own font.",
-                    "# The game's fonts are tried first, then the fonts installed on this computer:",
-                    "# a name present in both lists uses the game's font.",
-                    "",
-                    "## Fonts loaded by the game",
-                };
-            lines.AddRange(gameFonts.Distinct(System.StringComparer.OrdinalIgnoreCase));
-            lines.Add("");
-            lines.Add("## Fonts installed on this computer");
-            lines.AddRange(systemFonts.Distinct(System.StringComparer.OrdinalIgnoreCase));
-            File.WriteAllLines(path, lines, Encoding.UTF8);
-            AFK.LogInfo($"IndicatorFont choices written to {path}");
-        }
-        catch (System.Exception ex)
-        {
-            AFK.LogWarning($"Could not write the font list: {ex.Message}");
-        }
     }
 
     /// <summary>

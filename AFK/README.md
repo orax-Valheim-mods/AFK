@@ -61,7 +61,6 @@ announced by a short message in the top left corner (`Notify`).
 | 5 - Display | IndicatorShowWaiting | true | Also show "AFK: waiting - … (12s)" with a live countdown in that same spot while the request waits. |
 | 5 - Display | IndicatorText | AFK | Text of that message (empty = off). |
 | 5 - Display | IndicatorFontSize | 40 | Font size of the message (clamped 8-200). |
-| 5 - Display | IndicatorFont | (empty) | Font of the message: empty = the game's own UI font; otherwise a loaded game font or an installed system font name. All usable names are listed in `orax.AFK.Fonts.txt`, next to the config file. |
 | 5 - Display | IndicatorColor | #FFFFFFFF | Color of the message, HTML hex `#RRGGBB` / `#RRGGBBAA`. |
 | 5 - Display | IndicatorAnchor | TopCenter | Which point of the message sits at the position: TopLeft, TopCenter, TopRight, Left, Center, Right, BottomLeft, BottomCenter, BottomRight. |
 | 5 - Display | IndicatorPositionX | 50 | Horizontal position of that anchor: percent of the screen width (0 = left, 100 = right), or pixels with the Pixels unit. |
