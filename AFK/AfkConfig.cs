@@ -201,9 +201,9 @@ internal static class AfkConfig
             "",
             "Font of the persistent message. Leave empty to use the game's own UI font. "
                 + "Otherwise write a font name: fonts already loaded by the game are tried "
-                + "first (their names are listed in the BepInEx log), then fonts installed "
-                + "on this computer (for example \"Consolas\" or \"Impact\"). Unknown "
-                + "names keep the game's font."
+                + "first, then fonts installed on this computer. Every usable name is listed "
+                + "in orax.AFK.Fonts.txt, next to this file. Unknown names keep the game's "
+                + "font."
         );
 
         IndicatorColor = config.Bind(
