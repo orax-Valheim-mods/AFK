@@ -23,8 +23,12 @@ On top of that, a **persistent message** (default "AFK", configurable text / siz
 is displayed in the top center of the screen **for as long as the status lasts** - it
 disappears the moment the status is released. Press **F9** (`IndicatorColorKey`) to choose
 its color with Jotunn's interactive color picker: *Done* keeps the new color, *Cancel*
-restores the previous one (the setting is saved to the config file). The short top left
-messages announcing each transition are controlled separately by `Notify`.
+restores the previous one (the setting is saved to the config file). While the request is
+still waiting for the quiet timers, the **same spot** shows the pending message with a
+**live countdown** (`IndicatorShowWaiting`, default on): *"AFK: waiting - no damage dealt,
+no enemy aggro (12s)"* - the seconds tick down and the line is replaced by the indicator
+as soon as the status activates. The short top left messages announcing any change are
+controlled separately by `Notify`.
 
 Request the status whenever you want: if the quiet conditions don't hold yet (you just
 finished a fight), a "waiting" message shows what is missing and for how long, and the
@@ -48,6 +52,7 @@ announced by a short message in the top left corner (`Notify`).
 | 4 - Effects | InvisibleToEnemies | true | Creatures cannot see, hear or target you (synced). |
 | 4 - Effects | IgnoreEnemyDamage | false | Creature attacks deal no damage while AFK. |
 | 5 - Display | IndicatorEnabled | true | Persistent message in the top center while AFK; gone when the status is released. |
+| 5 - Display | IndicatorShowWaiting | true | Also show "AFK: waiting - … (12s)" with a live countdown in that same spot while the request waits. |
 | 5 - Display | IndicatorText | AFK | Text of that message (empty = off). |
 | 5 - Display | IndicatorFontSize | 40 | Font size of the message (clamped 8-200). |
 | 5 - Display | IndicatorColor | #FFFFFFFF | Color of the message, HTML hex `#RRGGBB` / `#RRGGBBAA`. |

@@ -33,6 +33,8 @@ internal static class AfkConfig
     // -- 5 - Display ------------------------------------------------------------------
     internal static ConfigEntry<bool> IndicatorEnabled = null!;
 
+    internal static ConfigEntry<bool> IndicatorShowWaiting = null!;
+
     internal static ConfigEntry<string> IndicatorText = null!;
 
     internal static ConfigEntry<int> IndicatorFontSize = null!;
@@ -134,6 +136,18 @@ internal static class AfkConfig
             "Show a persistent message in the top center of the screen for as long as the "
                 + "AFK status is active. It disappears the moment the status is released "
                 + "(this is independent from the one-shot Notify messages)."
+        );
+
+        IndicatorShowWaiting = config.Bind(
+            "5 - Display",
+            "IndicatorShowWaiting",
+            true,
+            "While the request is waiting for the quiet timers, also show the pending "
+                + "condition message with a live countdown, in the same spot as "
+                + "IndicatorText and with its font size and color: "
+                + "\"AFK: waiting - no damage dealt, no enemy aggro (12s)\" - the seconds "
+                + "tick down and the line is replaced by IndicatorText as soon as the "
+                + "status activates."
         );
 
         IndicatorText = config.Bind(

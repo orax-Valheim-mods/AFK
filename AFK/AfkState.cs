@@ -241,6 +241,17 @@ internal static class AfkState
             && s_sinceAggro >= AfkConfig.SecondsSinceAggro.Value;
     }
 
+    /// <summary>
+    /// The pending status message with its live countdown ("AFK: waiting - no damage
+    /// dealt, no enemy aggro (12s)"). Recomputed from the timers on every call, so the
+    /// HUD indicator shows the seconds actually ticking down; identical to the TopLeft
+    /// Notify text.
+    /// </summary>
+    internal static string WaitingMessage()
+    {
+        return $"AFK: waiting - {PendingReason()}";
+    }
+
     private static string? StatusMessage(
         bool wasRequested,
         bool wasActive,
