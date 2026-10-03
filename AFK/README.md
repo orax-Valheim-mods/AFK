@@ -26,7 +26,10 @@ On top of that, a **persistent message** (default "AFK", configurable text / siz
 color) is displayed in the top center of the screen **for as long as the status lasts** - it
 disappears the moment the status is released. It is drawn **behind the game's own UI**
 (menus, inventory, map): opening one leaves the message in the background instead of on
-top of the interface. While the request is
+top of the interface. Its spot is configurable with a nine-point anchor
+(`IndicatorAnchor`, default `TopCenter`) placed at `IndicatorPositionX` /
+`IndicatorPositionY` (percents of the screen, or pixels with `IndicatorPositionUnit`).
+While the request is
 still waiting for the quiet timers, the **same spot** shows the pending message with a
 **live countdown** (`IndicatorShowWaiting`, default on): *"AFK: waiting - no damage dealt,
 no enemy aggro (12s)"* - the seconds tick down and the line is replaced by the indicator
@@ -60,6 +63,10 @@ announced by a short message in the top left corner (`Notify`).
 | 5 - Display | IndicatorFontSize | 40 | Font size of the message (clamped 8-200). |
 | 5 - Display | IndicatorFont | (empty) | Font of the message: empty = the game's own UI font; otherwise a loaded game font or installed system font name (names listed in the BepInEx log). |
 | 5 - Display | IndicatorColor | #FFFFFFFF | Color of the message, HTML hex `#RRGGBB` / `#RRGGBBAA`. |
+| 5 - Display | IndicatorAnchor | TopCenter | Which point of the message sits at the position: TopLeft, TopCenter, TopRight, Left, Center, Right, BottomLeft, BottomCenter, BottomRight. |
+| 5 - Display | IndicatorPositionX | 50 | Horizontal position of that anchor: percent of the screen width (0 = left, 100 = right), or pixels with the Pixels unit. |
+| 5 - Display | IndicatorPositionY | 15 | Vertical position: percent of the screen height (0 = top, 100 = bottom), or pixels. |
+| 5 - Display | IndicatorPositionUnit | Percent | Whether the two positions are percents of the screen or pixels. |
 
 # Installation
 

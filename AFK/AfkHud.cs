@@ -11,9 +11,11 @@ namespace AFK;
 /// vanilla HUD, inventory and menus are uGUI/TextMeshPro canvases rendered after it:
 /// the message therefore sits BEHIND them (visible through translucent menu
 /// backdrops, hidden behind opaque ones) instead of covering the menus the way the
-/// old IMGUI label did. One line, one spot (top center): IndicatorText while the
-/// status is Active, and - when enabled - the "AFK: waiting - ..." condition message
-/// with its live countdown while the request still waits for the quiet timers.
+/// old IMGUI label did. One line at a configurable spot: the nine-point anchor of
+/// IndicatorAnchor placed at IndicatorPositionX / IndicatorPositionY (top center by
+/// default). IndicatorText shows while the status is Active, and - when enabled - the
+/// "AFK: waiting - ..." condition message with its live countdown while the request
+/// still waits for the quiet timers.
 ///
 /// The font follows IndicatorFont: empty keeps Valheim's own UI font, a name picks a
 /// TMP font the game already has loaded (every loaded name is written once to the
@@ -28,10 +30,6 @@ namespace AFK;
 /// </summary>
 internal static class AfkHud
 {
-    // Top center: below the top-left zone/status messages, well above the hotbar, and clear
-    // of the vanilla TopLeft transition notifications (they fade, this one persists).
-    private const float VerticalFraction = 0.15f;
-
     // Valheim's own canvases sort at 0 or above: staying well below puts the message
     // behind every menu, while a Screen Space Overlay canvas still draws over the world.
     private const int SortingOrder = -1000;
@@ -40,6 +38,7 @@ internal static class AfkHud
     private static TextMeshProUGUI? s_label;
     private static string? s_shownText;
     private static int s_shownFontSize = -1;
+    private static float s_boxWidth;
     private static Color s_shownColor = new(-1f, -1f, -1f, -1f);
     private static bool s_fontWarningLogged;
     private static bool s_fontsListed;
@@ -85,6 +84,7 @@ internal static class AfkHud
         s_label = null;
         s_shownText = null;
         s_shownFontSize = -1;
+        s_boxWidth = 0f;
         s_shownColor = new Color(-1f, -1f, -1f, -1f);
         s_fontWarningLogged = false;
         s_fontsListed = false;
@@ -115,12 +115,14 @@ internal static class AfkHud
         int fontSize = Mathf.Clamp(AfkConfig.IndicatorFontSize.Value, 8, 200);
         Color color = ParseColor(AfkConfig.IndicatorColor.Value);
 
-        if (s_shownText != text)
+        bool textChanged = s_shownText != text;
+        if (textChanged)
         {
             s_label!.text = text;
             s_shownText = text;
         }
-        if (s_shownFontSize != fontSize)
+        bool fontSizeChanged = s_shownFontSize != fontSize;
+        if (fontSizeChanged)
         {
             s_label!.fontSize = fontSize;
             s_shownFontSize = fontSize;
@@ -131,11 +133,45 @@ internal static class AfkHud
             s_shownColor = color;
         }
 
-        // Full-width band starting 15% down from the top - the spot the old IMGUI label
-        // used, so the position on screen does not change.
+        // One line wide (measured only when the text or the size changes), band height.
+        if (textChanged || fontSizeChanged)
+        {
+            s_boxWidth = s_label!.GetPreferredValues(text).x;
+        }
+
+        // The chosen anchor point of that box sits exactly at (PositionX, PositionY) -
+        // percents of the screen or pixels, y counted from the top like in CreatureStarAlert.
         RectTransform rect = s_label!.rectTransform;
-        rect.anchoredPosition = new Vector2(0f, -Screen.height * VerticalFraction);
-        rect.sizeDelta = new Vector2(0f, fontSize * 1.5f);
+        rect.sizeDelta = new Vector2(s_boxWidth, fontSize * 1.5f);
+        AnchorFactor(AfkConfig.IndicatorAnchor.Value, out float anchorX, out float anchorY);
+        float screenW = Screen.width;
+        float screenH = Screen.height;
+        float positionX;
+        float positionY;
+        if (
+            string.Equals(
+                AfkConfig.IndicatorPositionUnit.Value,
+                AfkConfig.UnitPixels,
+                System.StringComparison.OrdinalIgnoreCase
+            )
+        )
+        {
+            positionX = AfkConfig.IndicatorPositionX.Value;
+            positionY = AfkConfig.IndicatorPositionY.Value;
+        }
+        else
+        {
+            positionX = screenW * AfkConfig.IndicatorPositionX.Value / 100f;
+            positionY = screenH * AfkConfig.IndicatorPositionY.Value / 100f;
+        }
+
+        // uGUI anchors grow y upwards, the screen position counts y downwards.
+        rect.anchorMin = rect.anchorMax = new Vector2(
+            screenW > 0f ? positionX / screenW : 0.5f,
+            screenH > 0f ? 1f - positionY / screenH : 0.85f
+        );
+        rect.pivot = new Vector2(anchorX, 1f - anchorY);
+        rect.anchoredPosition = Vector2.zero;
 
         if (!s_root!.activeSelf)
         {
@@ -174,11 +210,6 @@ internal static class AfkHud
         s_label.textWrappingMode = TextWrappingModes.NoWrap;
         s_label.overflowMode = TextOverflowModes.Overflow;
         s_label.raycastTarget = false;
-
-        RectTransform rect = s_label.rectTransform;
-        rect.anchorMin = new Vector2(0f, 1f);
-        rect.anchorMax = new Vector2(1f, 1f);
-        rect.pivot = new Vector2(0.5f, 1f);
         return true;
     }
 
@@ -294,6 +325,58 @@ internal static class AfkHud
             }
         }
         AFK.LogInfo($"Loaded TMP fonts: {string.Join(", ", names)}");
+    }
+
+    /// <summary>
+    /// Turns the IndicatorAnchor name into the anchor point of the box: x grows right,
+    /// y grows down (0 = top edge), the same convention as the screen position.
+    /// </summary>
+    private static void AnchorFactor(string? name, out float anchorX, out float anchorY)
+    {
+        switch (name)
+        {
+            case AfkConfig.AnchorTopLeft:
+                anchorX = 0f;
+                anchorY = 0f;
+                break;
+            case AfkConfig.AnchorTopCenter:
+                anchorX = 0.5f;
+                anchorY = 0f;
+                break;
+            case AfkConfig.AnchorTopRight:
+                anchorX = 1f;
+                anchorY = 0f;
+                break;
+            case AfkConfig.AnchorLeft:
+                anchorX = 0f;
+                anchorY = 0.5f;
+                break;
+            case AfkConfig.AnchorCenter:
+                anchorX = 0.5f;
+                anchorY = 0.5f;
+                break;
+            case AfkConfig.AnchorRight:
+                anchorX = 1f;
+                anchorY = 0.5f;
+                break;
+            case AfkConfig.AnchorBottomLeft:
+                anchorX = 0f;
+                anchorY = 1f;
+                break;
+            case AfkConfig.AnchorBottomCenter:
+                anchorX = 0.5f;
+                anchorY = 1f;
+                break;
+            case AfkConfig.AnchorBottomRight:
+                anchorX = 1f;
+                anchorY = 1f;
+                break;
+            default:
+                // Anything unrecognised falls back to the default anchor (top center).
+                anchorX = 0.5f;
+                anchorY = 0f;
+                break;
+        }
     }
 
     /// <summary>Accepts "#RRGGBB" / "#RRGGBBAA", falls back to plain white.</summary>

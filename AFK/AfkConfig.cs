@@ -10,6 +10,24 @@ namespace AFK;
 /// </summary>
 internal static class AfkConfig
 {
+    // Anchor names: one source of truth for the IndicatorAnchor acceptable values and
+    // the parser in AfkHud - the nine points of a three by three grid.
+    internal const string AnchorTopLeft = "TopLeft";
+    internal const string AnchorTopCenter = "TopCenter";
+    internal const string AnchorTopRight = "TopRight";
+    internal const string AnchorLeft = "Left";
+    internal const string AnchorCenter = "Center";
+    internal const string AnchorRight = "Right";
+    internal const string AnchorBottomLeft = "BottomLeft";
+    internal const string AnchorBottomCenter = "BottomCenter";
+    internal const string AnchorBottomRight = "BottomRight";
+
+    internal const string UnitPercent = "Percent";
+    internal const string UnitPixels = "Pixels";
+
+    // Highest accepted IndicatorPositionX / IndicatorPositionY (pixels of an 8K screen).
+    internal const int MaxScreenCoordinate = 10000;
+
     // -- 1 - General -----------------------------------------------------------------
     internal static ConfigEntry<bool> Enabled = null!;
 
@@ -42,6 +60,14 @@ internal static class AfkConfig
     internal static ConfigEntry<string> IndicatorFont = null!;
 
     internal static ConfigEntry<string> IndicatorColor = null!;
+
+    internal static ConfigEntry<string> IndicatorAnchor = null!;
+
+    internal static ConfigEntry<int> IndicatorPositionX = null!;
+
+    internal static ConfigEntry<int> IndicatorPositionY = null!;
+
+    internal static ConfigEntry<string> IndicatorPositionUnit = null!;
 
     /// <summary>Binds every setting to the config file. Called once, from AFK.Awake.</summary>
     internal static void Bind(ConfigFile config)
@@ -186,6 +212,64 @@ internal static class AfkConfig
             "#FFFFFFFF",
             "Color of the persistent message as HTML hex: #RRGGBB or #RRGGBBAA "
                 + "(the last two digits set the opacity). Invalid values fall back to white."
+        );
+
+        IndicatorAnchor = config.Bind(
+            "5 - Display",
+            "IndicatorAnchor",
+            AnchorTopCenter,
+            new ConfigDescription(
+                "Point of the message placed at the position: TopLeft puts its top left "
+                    + "corner there, Center its centre, and so on. Changing it barely moves "
+                    + "the message (by its own size at most): use IndicatorPositionX and "
+                    + "IndicatorPositionY to move it on screen.",
+                new AcceptableValueList<string>(
+                    AnchorTopLeft,
+                    AnchorTopCenter,
+                    AnchorTopRight,
+                    AnchorLeft,
+                    AnchorCenter,
+                    AnchorRight,
+                    AnchorBottomLeft,
+                    AnchorBottomCenter,
+                    AnchorBottomRight
+                )
+            )
+        );
+
+        IndicatorPositionX = config.Bind(
+            "5 - Display",
+            "IndicatorPositionX",
+            50,
+            new ConfigDescription(
+                "Horizontal position of the anchor: percent of the screen width "
+                    + "(0 = left edge, 100 = right edge), or pixels from the left edge "
+                    + "when the unit is Pixels.",
+                new AcceptableValueRange<int>(0, MaxScreenCoordinate)
+            )
+        );
+
+        IndicatorPositionY = config.Bind(
+            "5 - Display",
+            "IndicatorPositionY",
+            15,
+            new ConfigDescription(
+                "Vertical position of the anchor: percent of the screen height "
+                    + "(0 = top edge, 100 = bottom edge), or pixels from the top edge "
+                    + "when the unit is Pixels.",
+                new AcceptableValueRange<int>(0, MaxScreenCoordinate)
+            )
+        );
+
+        IndicatorPositionUnit = config.Bind(
+            "5 - Display",
+            "IndicatorPositionUnit",
+            UnitPercent,
+            new ConfigDescription(
+                "Whether IndicatorPositionX and IndicatorPositionY are percents of the "
+                    + "screen or pixels.",
+                new AcceptableValueList<string>(UnitPercent, UnitPixels)
+            )
         );
     }
 }
