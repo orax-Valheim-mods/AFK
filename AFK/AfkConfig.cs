@@ -83,21 +83,28 @@ internal static class AfkConfig
             "3 - Conditions",
             "SecondsSinceDamageDealt",
             60f,
-            "You only obtain the AFK status once you have NOT damaged any character for this "
-                + "many seconds (melee, arrows, bombs... - every hit you land counts). "
-                + "The timers start when you join a world. 0 = no wait."
+            new ConfigDescription(
+                "You only obtain the AFK status once you have NOT damaged any character for "
+                    + "this many seconds (melee, arrows, bombs... - every hit you land "
+                    + "counts). The timers start when you join a world. Allowed range: "
+                    + "5 to 60 seconds.",
+                new AcceptableValueRange<float>(5f, 60f)
+            )
         );
 
         SecondsSinceAggro = config.Bind(
             "3 - Conditions",
             "SecondsSinceAggro",
             30f,
-            "You only obtain the AFK status once no enemy has had aggro on you for this "
-                + "many seconds. Aggro uses the game's own combat signal (the same one that "
-                + "starts combat music): an ALERTED hostile holding you as its target, "
-                + "re-sent about every 0.5 s while it lasts, and being hit by a character. "
-                + "Creatures that merely notice or flee from you (deer, boar...) never "
-                + "count. 0 = no wait."
+            new ConfigDescription(
+                "You only obtain the AFK status once no enemy has had aggro on you for this "
+                    + "many seconds. Aggro uses the game's own combat signal (the same one "
+                    + "that starts combat music): an ALERTED hostile holding you as its "
+                    + "target, re-sent about every 0.5 s while it lasts, and being hit by a "
+                    + "character. Creatures that merely notice or flee from you (deer, "
+                    + "boar...) never count. Allowed range: 5 to 60 seconds.",
+                new AcceptableValueRange<float>(5f, 60f)
+            )
         );
 
         InvisibleToEnemies = config.Bind(
