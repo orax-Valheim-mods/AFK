@@ -24,12 +24,12 @@ is displayed in the top center of the screen **for as long as the status lasts**
 disappears the moment the status is released. The short top left messages announcing each
 transition are controlled separately by `Notify`.
 
-The quiet conditions are only checked **when you request the status**: if they don't hold
-yet, a "waiting" message shows what is missing and for how long, and you simply ask again
-once the timers have passed. Once granted, the status is **not re-checked anymore** - it
-lasts until you release it (keybind, crouch, movement / combat input - always on - or
-death), or until the master switch is turned off. Every change is announced by a short
-message in the top left corner (`Notify`).
+Request the status whenever you want: if the quiet conditions don't hold yet (you just
+finished a fight), a "waiting" message shows what is missing and for how long, and the
+status **activates by itself** once the timers pass. Once active it is **never taken away
+by combat events** - it lasts until you release it (keybind, crouch, movement / combat
+input - always on - or death), or until the master switch is turned off. Every change is
+announced by a short message in the top left corner (`Notify`).
 
 # Configuration
 

@@ -13,9 +13,10 @@ namespace AFK;
 ///  - Requested: what the triggers (keybind / crouch) asked for. Released by the action
 ///    cancel, by death, or by the triggers themselves.
 ///  - Active:    the granted status = Enabled &amp;&amp; Requested &amp;&amp; alive
-///    &amp;&amp; both quiet conditions held at the moment of the request (entry check only
-///    - they are NOT re-evaluated while the status lasts). Only while Active the effects
-///    apply.
+///    &amp;&amp; the quiet conditions held at some point since the request: re-checked
+///    live while waiting (the status activates by itself once the timers pass) but
+///    latched once granted (combat events never take it away). Only while Active the
+///    effects apply.
 ///
 /// The "invisible to enemies" effect is published as a bool on the player's OWN ZDO
 /// (GhostKey): creature AI only runs on the machine owning the creature ZDO, and the
@@ -66,8 +67,6 @@ internal static class AfkState
     private static float s_sinceDamageDealt;
 
     private static float s_sinceAggro;
-
-    private static bool s_conditionsMetOnEntry;
 
     private static bool s_loggedNotOwner;
 
@@ -128,11 +127,16 @@ internal static class AfkState
             SetRequested(false);
         }
 
-        // 4) Grant / drop the status. The quiet conditions are only evaluated when the
-        //    request is made (snapshot in SetRequested): once granted, the status is never
-        //    re-checked and lasts until released by the triggers, action input, death or
-        //    the master switch.
-        Active = AfkConfig.Enabled.Value && Requested && !player.IsDead() && s_conditionsMetOnEntry;
+        // 4) Grant / drop the status. While the request is still WAITING the quiet
+        //    conditions are re-checked live every frame, so a request made too early is
+        //    not lost: the status activates by itself once the timers pass. Once ACTIVE
+        //    it is latched through wasActive: combat events never take it away - only the
+        //    triggers, action input, death or the master switch do.
+        Active =
+            AfkConfig.Enabled.Value
+            && Requested
+            && !player.IsDead()
+            && (wasActive || AreConditionsMet());
 
         // 5) One status message per change.
         message ??= StatusMessage(wasRequested, wasActive, notifyRequestChange);
@@ -213,23 +217,15 @@ internal static class AfkState
         Active = false;
         s_sinceDamageDealt = 0f;
         s_sinceAggro = 0f;
-        s_conditionsMetOnEntry = false;
         s_loggedNotOwner = false;
     }
 
     private static void SetRequested(bool value)
     {
-        if (Requested == value)
-        {
-            return;
-        }
+        // Only the request layer lives here. The quiet conditions are deliberately NOT
+        // snapshotted: Tick re-checks them live while waiting and latches the status once
+        // granted (wasActive), so "hit something -> ask -> wait" ends up activating.
         Requested = value;
-        if (value)
-        {
-            // The quiet conditions are only ever evaluated here: the status keeps this
-            // snapshot for as long as the request lasts.
-            s_conditionsMetOnEntry = AreConditionsMet();
-        }
     }
 
     private static bool AreConditionsMet()
@@ -250,8 +246,9 @@ internal static class AfkState
             {
                 return "AFK: active";
             }
-            // With the entry-only check the only way to lose an active status while still
-            // requesting it is the master switch: the timers have nothing to do with it.
+            // The status is latched while requested: the only way to lose it without
+            // releasing the request is the master switch. The timers have nothing to do
+            // with it.
             return Requested ? "AFK: paused (mod disabled)" : "AFK: off";
         }
         if (Requested != wasRequested && notifyRequestChange)
