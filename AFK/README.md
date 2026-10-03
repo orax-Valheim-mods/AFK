@@ -22,8 +22,8 @@ While the status is active its effects apply (each one is a config toggle):
   nothing can kill you while AFK. Damage from other players and from the environment still
   goes through.
 
-On top of that, a **persistent message** (default "AFK", configurable text / size / color)
-is displayed in the top center of the screen **for as long as the status lasts** - it
+On top of that, a **persistent message** (default "AFK", configurable text / size / font /
+color) is displayed in the top center of the screen **for as long as the status lasts** - it
 disappears the moment the status is released. It is drawn **behind the game's own UI**
 (menus, inventory, map): opening one leaves the message in the background instead of on
 top of the interface. While the request is
@@ -58,6 +58,7 @@ announced by a short message in the top left corner (`Notify`).
 | 5 - Display | IndicatorShowWaiting | true | Also show "AFK: waiting - … (12s)" with a live countdown in that same spot while the request waits. |
 | 5 - Display | IndicatorText | AFK | Text of that message (empty = off). |
 | 5 - Display | IndicatorFontSize | 40 | Font size of the message (clamped 8-200). |
+| 5 - Display | IndicatorFont | (empty) | Font of the message: empty = the game's own UI font; otherwise a loaded game font or installed system font name (names listed in the BepInEx log). |
 | 5 - Display | IndicatorColor | #FFFFFFFF | Color of the message, HTML hex `#RRGGBB` / `#RRGGBBAA`. |
 
 # Installation

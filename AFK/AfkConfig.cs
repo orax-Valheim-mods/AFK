@@ -39,6 +39,8 @@ internal static class AfkConfig
 
     internal static ConfigEntry<int> IndicatorFontSize = null!;
 
+    internal static ConfigEntry<string> IndicatorFont = null!;
+
     internal static ConfigEntry<string> IndicatorColor = null!;
 
     /// <summary>Binds every setting to the config file. Called once, from AFK.Awake.</summary>
@@ -163,6 +165,17 @@ internal static class AfkConfig
             "IndicatorFontSize",
             40,
             "Font size of the persistent message (clamped to 8-200)."
+        );
+
+        IndicatorFont = config.Bind(
+            "5 - Display",
+            "IndicatorFont",
+            "",
+            "Font of the persistent message. Leave empty to use the game's own UI font. "
+                + "Otherwise write a font name: fonts already loaded by the game are tried "
+                + "first (their names are listed in the BepInEx log), then fonts installed "
+                + "on this computer (for example \"Consolas\" or \"Impact\"). Unknown "
+                + "names keep the game's font."
         );
 
         IndicatorColor = config.Bind(
