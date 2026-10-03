@@ -65,10 +65,12 @@ internal static class AfkConfig
         ToggleKey = config.Bind(
             "2 - Trigger",
             "ToggleKey",
-            new KeyboardShortcut(KeyCode.F8),
+            new KeyboardShortcut(KeyCode.None),
             "Key that toggles the AFK request (modifiers such as Ctrl/Shift are supported). "
                 + "Polled through ZInput like the game polls its own bindings, and ignored "
-                + "while typing in chat, the console, a menu or the inventory."
+                + "while typing in chat, the console, a menu or the inventory. Defaults to "
+                + "Not set: sitting down (the Sit trigger) is then the only way to request "
+                + "the status."
         );
 
         SitTriggers = config.Bind(

@@ -340,6 +340,11 @@ internal static class AfkState
 
     private static bool PressedShortcut(KeyboardShortcut shortcut)
     {
+        // Not set (None): the keybind never fires - the sit trigger still works.
+        if (shortcut.MainKey == KeyCode.None)
+        {
+            return false;
+        }
         if (!ZInput.GetKeyDown(shortcut.MainKey, false))
         {
             return false;
