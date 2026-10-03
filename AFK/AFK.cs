@@ -61,6 +61,7 @@ internal class AFK : BaseUnityPlugin
     private void OnDestroy()
     {
         AfkState.Shutdown();
+        AfkHud.Reset();
         PatchHarmony?.UnpatchSelf();
         PatchHarmony = null;
         s_instance = null;
@@ -69,10 +70,6 @@ internal class AFK : BaseUnityPlugin
     private void Update()
     {
         AfkState.Tick();
-    }
-
-    private void OnGUI()
-    {
-        AfkHud.Draw();
+        AfkHud.Sync();
     }
 }

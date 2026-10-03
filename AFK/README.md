@@ -24,7 +24,9 @@ While the status is active its effects apply (each one is a config toggle):
 
 On top of that, a **persistent message** (default "AFK", configurable text / size / color)
 is displayed in the top center of the screen **for as long as the status lasts** - it
-disappears the moment the status is released. While the request is
+disappears the moment the status is released. It is drawn **behind the game's own UI**
+(menus, inventory, map): opening one leaves the message in the background instead of on
+top of the interface. While the request is
 still waiting for the quiet timers, the **same spot** shows the pending message with a
 **live countdown** (`IndicatorShowWaiting`, default on): *"AFK: waiting - no damage dealt,
 no enemy aggro (12s)"* - the seconds tick down and the line is replaced by the indicator
