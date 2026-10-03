@@ -98,14 +98,8 @@ internal static class AfkState
         bool notifyRequestChange = false;
         string? message = null;
 
-        // 2) Triggers. The color picker is a settings action: it also works while the mod
-        //    is disabled or the player is dead, but never while a UI takes the input.
+        // 2) Triggers. Never while a UI takes the input.
         bool inputBlocked = IsInputBlocked();
-        if (!inputBlocked && PressedShortcut(AfkConfig.IndicatorColorKey.Value))
-        {
-            AfkColorPicker.Open();
-        }
-
         if (AfkConfig.Enabled.Value && !player.IsDead() && !inputBlocked)
         {
             if (PressedShortcut(AfkConfig.ToggleKey.Value))
