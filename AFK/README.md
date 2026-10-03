@@ -1,7 +1,8 @@
 # Description
 
 AFK adds an **AFK status** you can toggle with a keybind (**F8** by default) or by
-**crouching**. The status is only granted while both quiet conditions hold:
+**sitting down** (the game's `Sit` action, **X** by default). The status is only granted
+while both quiet conditions hold:
 
 - you have not damaged an enemy for `SecondsSinceDamageDealt` (default 60 s, allowed
   range **5-60 s**; hits on corpses, PVP-off players, friendly tames or neutral creatures
@@ -33,7 +34,7 @@ controlled separately by `Notify`.
 Request the status whenever you want: if the quiet conditions don't hold yet (you just
 finished a fight), a "waiting" message shows what is missing and for how long, and the
 status **activates by itself** once the timers pass. Once active it is **never taken away
-by combat events** - it lasts until you release it (keybind, crouch, movement / combat
+by combat events** - it lasts until you release it (keybind, sit, movement / combat
 input - always on - or death), or until the master switch is turned off. Every change is
 announced by a short message in the top left corner (`Notify`).
 
@@ -46,7 +47,7 @@ announced by a short message in the top left corner (`Notify`).
 | 1 - General | Enabled | true | Master switch. |
 | 1 - General | Notify | true | Status messages in the top left corner. |
 | 2 - Trigger | ToggleKey | F8 | Key (with optional Ctrl/Shift/Alt modifiers) that toggles the AFK request. |
-| 2 - Trigger | CrouchTriggers | true | Crouch key also toggles the AFK request. |
+| 2 - Trigger | SitTriggers | true | Sit key (**X** by default) also toggles the AFK request. |
 | 3 - Conditions | SecondsSinceDamageDealt | 60 | Quiet time since your last hit on an enemy (5-60 s). |
 | 3 - Conditions | SecondsSinceAggro | 30 | Quiet time since an alerted enemy last targeted you, or since a character hit you (5-60 s). |
 | 4 - Effects | InvisibleToEnemies | true | Creatures cannot see, hear or target you (synced). |

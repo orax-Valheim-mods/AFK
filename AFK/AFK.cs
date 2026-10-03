@@ -7,7 +7,7 @@ namespace AFK;
 
 /// <summary>
 /// AFK - grants the local player an "AFK status" when the configured keybind is pressed or
-/// the player crouches, but only while both quiet conditions hold: no damage dealt to a
+/// the player sits down, but only while both quiet conditions hold: no damage dealt to a
 /// character and no enemy aggro on the player, each for a configurable time.
 ///
 /// Multiplayer: the vanilla "ghost" console command only writes the LOCAL field
@@ -52,7 +52,7 @@ internal class AFK : BaseUnityPlugin
 
         Logger.LogInfo(
             $"{PluginName} {PluginVersion} loaded - toggle: {AfkConfig.ToggleKey.Value}, "
-                + $"crouch trigger: {AfkConfig.CrouchTriggers.Value}, "
+                + $"sit trigger: {AfkConfig.SitTriggers.Value}, "
                 + $"invisible: {AfkConfig.InvisibleToEnemies.Value}, "
                 + $"no damage: {AfkConfig.IgnoreEnemyDamage.Value}"
         );

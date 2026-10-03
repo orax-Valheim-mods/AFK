@@ -10,7 +10,7 @@ namespace AFK;
 /// then only resets the state).
 ///
 /// Two layers of state:
-///  - Requested: what the triggers (keybind / crouch) asked for. Released by the action
+///  - Requested: what the triggers (keybind / sit) asked for. Released by the action
 ///    cancel, by death, or by the triggers themselves.
 ///  - Active:    the granted status = Enabled &amp;&amp; Requested &amp;&amp; alive
 ///    &amp;&amp; the quiet conditions held at some point since the request: re-checked
@@ -108,11 +108,11 @@ internal static class AfkState
                 SetRequested(!Requested);
                 notifyRequestChange = true;
             }
-            else if (AfkConfig.CrouchTriggers.Value && PressedCrouch())
+            else if (AfkConfig.SitTriggers.Value && PressedSit(player))
             {
-                // Crouching is also a normal stealth action, so a crouch-triggered request
-                // only speaks up when it actually grants (or drops) the status - no
-                // "waiting" spam while sneaking around after a fight.
+                // Sitting down is also a normal action, so a sit-triggered request only
+                // speaks up when it actually grants (or drops) the status - no
+                // "waiting" spam while resting after a fight.
                 SetRequested(!Requested);
             }
             else if (Requested && ActionInputPressed())
@@ -354,9 +354,17 @@ internal static class AfkState
         return true;
     }
 
-    private static bool PressedCrouch()
+    private static bool PressedSit(Player player)
     {
-        return ZInput.GetButtonDown("Crouch") || ZInput.GetButtonDown("JoyCrouch");
+        // Mirror the game's own sit handling (Player.HandleRadialInput): the keyboard
+        // button fires on press, the gamepad one on release and only while not building
+        // or holding its alt-keys modifier.
+        return ZInput.GetButtonDown("Sit")
+            || (
+                !player.InPlaceMode()
+                && !ZInput.GetButton("JoyAltKeys")
+                && ZInput.GetButtonUp("JoySit")
+            );
     }
 
     private static bool ActionInputPressed()

@@ -18,7 +18,7 @@ internal static class AfkConfig
     // -- 2 - Trigger -----------------------------------------------------------------
     internal static ConfigEntry<KeyboardShortcut> ToggleKey = null!;
 
-    internal static ConfigEntry<bool> CrouchTriggers = null!;
+    internal static ConfigEntry<bool> SitTriggers = null!;
 
     // -- 3 - Conditions ---------------------------------------------------------------
     internal static ConfigEntry<float> SecondsSinceDamageDealt = null!;
@@ -69,14 +69,14 @@ internal static class AfkConfig
                 + "while typing in chat, the console, a menu or the inventory."
         );
 
-        CrouchTriggers = config.Bind(
+        SitTriggers = config.Bind(
             "2 - Trigger",
-            "CrouchTriggers",
+            "SitTriggers",
             true,
-            "Pressing the crouch key (C / gamepad) also toggles the AFK request. You keep "
-                + "crouching: the first press crouches and requests AFK, the second one "
-                + "stands up and releases it. Uncrouching for other reasons (swimming, "
-                + "low stamina, running) does NOT release the status - use the keybind for that."
+            "Pressing the Sit key (X by default, gamepad supported) also toggles the AFK "
+                + "request. The first press sits down and requests AFK, the second one "
+                + "stands up and releases it. Movement or action input still releases the "
+                + "status as usual, and so does the keybind."
         );
 
         SecondsSinceDamageDealt = config.Bind(

@@ -1,6 +1,6 @@
 ﻿{
   "name": "AFK",
-  "description": "Toggle an AFK status with a keybind or by crouching. Granted only when you have not damaged an enemy and no enemy has had aggro on you for a configurable time - then creatures can no longer see, hear or target you. Multiplayer and dedicated server compatible, all effects configurable.",
+  "description": "Toggle an AFK status with a keybind or by sitting down. Granted only when you have not damaged an enemy and no enemy has had aggro on you for a configurable time - then creatures can no longer see, hear or target you. Multiplayer and dedicated server compatible, all effects configurable.",
   "version_number": "0.1.0",
   "website_url": "https://github.com/orax-Valheim-mods/",
   "dependencies": [
