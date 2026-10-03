@@ -82,7 +82,7 @@ internal static class AfkConfig
         SecondsSinceDamageDealt = config.Bind(
             "3 - Conditions",
             "SecondsSinceDamageDealt",
-            60f,
+            30f,
             new ConfigDescription(
                 "You only obtain the AFK status once you have NOT damaged any character for "
                     + "this many seconds (melee, arrows, bombs... - every hit you land "
