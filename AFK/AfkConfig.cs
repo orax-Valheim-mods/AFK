@@ -1,4 +1,5 @@
 #nullable enable
+using System.Collections.Generic;
 using BepInEx.Configuration;
 using UnityEngine;
 
@@ -27,6 +28,10 @@ internal static class AfkConfig
 
     // Highest accepted IndicatorPositionX / IndicatorPositionY (pixels of an 8K screen).
     internal const int MaxScreenCoordinate = 10000;
+
+    // Kept for the late IndicatorFont bind: the game's fonts are only known after
+    // BepInEx has already called Bind at Awake.
+    private static ConfigFile? s_config;
 
     // -- 1 - General -----------------------------------------------------------------
     internal static ConfigEntry<bool> Enabled = null!;
@@ -57,6 +62,10 @@ internal static class AfkConfig
 
     internal static ConfigEntry<int> IndicatorFontSize = null!;
 
+    // Bound late - see BindIndicatorFont: the dropdown can only list the fonts the game
+    // has loaded, which is too late for BepInEx's Awake. Null until then.
+    internal static ConfigEntry<string>? IndicatorFont;
+
     internal static ConfigEntry<string> IndicatorColor = null!;
 
     internal static ConfigEntry<string> IndicatorAnchor = null!;
@@ -70,6 +79,8 @@ internal static class AfkConfig
     /// <summary>Binds every setting to the config file. Called once, from AFK.Awake.</summary>
     internal static void Bind(ConfigFile config)
     {
+        s_config = config;
+
         Enabled = config.Bind(
             "1 - General",
             "Enabled",
@@ -258,5 +269,68 @@ internal static class AfkConfig
                 new AcceptableValueList<string>(UnitPercent, UnitPixels)
             )
         );
+    }
+
+    /// <summary>
+    /// Binds IndicatorFont once the game's own fonts are known (AfkHud calls this on
+    /// the first frame where the HUD exists): the acceptable values become the config
+    /// editor's dropdown - every loaded font, each as regular, Bold, Italic and Bold
+    /// Italic - and BepInEx writes them into the config file with the entry, refreshing
+    /// them each session. The empty first value is the default (the game's own UI font)
+    /// and the value any unknown choice clamps back to.
+    /// </summary>
+    internal static void BindIndicatorFont(string[] fontNames)
+    {
+        if (IndicatorFont != null || s_config == null || fontNames.Length == 0)
+        {
+            return;
+        }
+
+        List<string> choices = new();
+        HashSet<string> seen = new(System.StringComparer.OrdinalIgnoreCase);
+        void Add(string value)
+        {
+            if (seen.Add(value))
+            {
+                choices.Add(value);
+            }
+        }
+
+        // Empty = the game's own font; also where an unloaded name clamps back to.
+        Add("");
+        foreach (string name in fontNames)
+        {
+            // An asset whose name already says bold or italic needs no such variant.
+            bool bold = name.EndsWith("Bold", System.StringComparison.OrdinalIgnoreCase);
+            bool italic = name.EndsWith("Italic", System.StringComparison.OrdinalIgnoreCase);
+            Add(name);
+            if (!bold)
+            {
+                Add(name + " Bold");
+            }
+            if (!italic)
+            {
+                Add(name + " Italic");
+            }
+            if (!bold && !italic)
+            {
+                Add(name + " Bold Italic");
+            }
+        }
+
+        IndicatorFont = s_config.Bind(
+            "5 - Display",
+            "IndicatorFont",
+            "",
+            new ConfigDescription(
+                "Font of the persistent message. Leave empty to use the game's own UI "
+                    + "font, in bold. Otherwise pick one of the fonts the game has loaded "
+                    + "- each font is offered as regular, Bold, Italic and Bold Italic. "
+                    + "The choices are refreshed in this file each time the game enters "
+                    + "a world.",
+                new AcceptableValueList<string>(choices.ToArray())
+            )
+        );
+        AFK.LogInfo($"IndicatorFont choices: {string.Join(", ", choices)}");
     }
 }

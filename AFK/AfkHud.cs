@@ -1,4 +1,5 @@
 #nullable enable
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -16,9 +17,11 @@ namespace AFK;
 /// "AFK: waiting - ..." condition message with its live countdown while the request
 /// still waits for the quiet timers.
 ///
-/// The label always uses the game's own UI font. The canvas is created lazily on the
-/// first shown frame, survives scene loads (DontDestroyOnLoad) and is destroyed from
-/// AFK.OnDestroy so a hot
+/// The label follows IndicatorFont: empty keeps the game's own UI font in bold (the
+/// message's classic look), otherwise a TMP font the game has loaded with the Bold /
+/// Italic variant spelled out in the choice - the dropdown of choices is fed to the
+/// config once the HUD exists. The canvas is created lazily on the first shown frame,
+/// survives scene loads (DontDestroyOnLoad) and is destroyed from AFK.OnDestroy so a hot
 /// reload (F6) cannot leave an orphan label behind. The whole object is deactivated
 /// whenever neither state applies (AfkState.Active / Requested false).
 ///
@@ -38,10 +41,16 @@ internal static class AfkHud
     private static float s_boxWidth;
     private static Color s_shownColor = new(-1f, -1f, -1f, -1f);
     private static bool s_fontWarningLogged;
+    private static bool s_fontChoicesDone;
+    private static string? s_fontChoice;
+    private static TMP_FontAsset? s_font;
+    private static FontStyles s_fontStyle;
 
     /// <summary>Called once per frame from AFK.Update: show, refresh or hide the message.</summary>
     internal static void Sync()
     {
+        OfferFontChoicesOnce();
+
         string? text = null;
         if (AfkConfig.IndicatorEnabled.Value)
         {
@@ -76,6 +85,10 @@ internal static class AfkHud
         s_boxWidth = 0f;
         s_shownColor = new Color(-1f, -1f, -1f, -1f);
         s_fontWarningLogged = false;
+        s_fontChoicesDone = false;
+        s_fontChoice = null;
+        s_font = null;
+        s_fontStyle = FontStyles.Normal;
     }
 
     private static void Show(string? text)
@@ -89,6 +102,7 @@ internal static class AfkHud
             return;
         }
 
+        ApplyFontChoice();
         if (s_label == null && !Create())
         {
             return;
@@ -164,8 +178,7 @@ internal static class AfkHud
     /// <summary>Builds the canvas and the label once. False = no font, message stays off.</summary>
     private static bool Create()
     {
-        TMP_FontAsset? font = DefaultFont();
-        if (font == null)
+        if (s_font == null)
         {
             if (!s_fontWarningLogged)
             {
@@ -184,13 +197,132 @@ internal static class AfkHud
         GameObject labelObject = new GameObject("Text");
         labelObject.transform.SetParent(s_root.transform, false);
         s_label = labelObject.AddComponent<TextMeshProUGUI>();
-        s_label.font = font;
+        s_label.font = s_font;
         s_label.alignment = TextAlignmentOptions.Center;
-        s_label.fontStyle = FontStyles.Bold;
+        s_label.fontStyle = s_fontStyle;
         s_label.textWrappingMode = TextWrappingModes.NoWrap;
         s_label.overflowMode = TextOverflowModes.Overflow;
         s_label.raycastTarget = false;
         return true;
+    }
+
+    /// <summary>
+    /// Feeds the config's IndicatorFont dropdown with the game's loaded fonts, once,
+    /// on the first frame where the HUD exists (all of the game's fonts are in by then).
+    /// </summary>
+    private static void OfferFontChoicesOnce()
+    {
+        if (s_fontChoicesDone || Hud.instance == null)
+        {
+            return;
+        }
+
+        List<string> names = new();
+        HashSet<string> seen = new(System.StringComparer.OrdinalIgnoreCase);
+        foreach (TMP_FontAsset asset in Resources.FindObjectsOfTypeAll<TMP_FontAsset>())
+        {
+            if (asset != null && asset.name.Length > 0 && seen.Add(asset.name))
+            {
+                names.Add(asset.name);
+            }
+        }
+        if (names.Count == 0)
+        {
+            return;
+        }
+
+        names.Sort(System.StringComparer.OrdinalIgnoreCase);
+        s_fontChoicesDone = true;
+        AfkConfig.BindIndicatorFont(names.ToArray());
+    }
+
+    /// <summary>
+    /// Applies IndicatorFont when its value changed: empty = the game's own UI font in
+    /// bold (the message's classic look), otherwise a loaded game font with the Bold /
+    /// Italic variant spelled out in the choice. Unknown names fall back with a warning.
+    /// </summary>
+    private static void ApplyFontChoice()
+    {
+        string choice = (AfkConfig.IndicatorFont?.Value ?? "").Trim();
+        if (choice == s_fontChoice)
+        {
+            return;
+        }
+        s_fontChoice = choice;
+
+        TMP_FontAsset? font;
+        FontStyles style;
+        if (choice.Length == 0)
+        {
+            font = DefaultFont();
+            style = FontStyles.Bold;
+        }
+        else
+        {
+            // The name may be a font asset of its own, or a style variant like "Name Bold".
+            font = FindLoadedFont(choice);
+            style = FontStyles.Normal;
+            if (font == null)
+            {
+                ParseStyle(choice, out string baseName, out FontStyles parsedStyle);
+                font = FindLoadedFont(baseName);
+                style = parsedStyle;
+            }
+            if (font == null)
+            {
+                AFK.LogWarning(
+                    $"Font \"{choice}\" is not loaded by the game - using the game's own font."
+                );
+                font = DefaultFont();
+                style = FontStyles.Bold;
+            }
+        }
+
+        s_font = font;
+        s_fontStyle = style;
+        if (s_label != null && font != null)
+        {
+            s_label.font = font;
+            s_label.fontStyle = style;
+        }
+    }
+
+    /// <summary>Splits a variant choice like "Name Bold Italic" into its base font name and style.</summary>
+    private static void ParseStyle(string choice, out string fontName, out FontStyles style)
+    {
+        if (choice.EndsWith(" Bold Italic", System.StringComparison.OrdinalIgnoreCase))
+        {
+            fontName = choice.Substring(0, choice.Length - " Bold Italic".Length);
+            style = FontStyles.Bold | FontStyles.Italic;
+        }
+        else if (choice.EndsWith(" Bold", System.StringComparison.OrdinalIgnoreCase))
+        {
+            fontName = choice.Substring(0, choice.Length - " Bold".Length);
+            style = FontStyles.Bold;
+        }
+        else if (choice.EndsWith(" Italic", System.StringComparison.OrdinalIgnoreCase))
+        {
+            fontName = choice.Substring(0, choice.Length - " Italic".Length);
+            style = FontStyles.Italic;
+        }
+        else
+        {
+            fontName = choice;
+            style = FontStyles.Normal;
+        }
+    }
+
+    /// <summary>A TMP font asset the game has already loaded, by asset name.</summary>
+    private static TMP_FontAsset? FindLoadedFont(string name)
+    {
+        foreach (TMP_FontAsset asset in Resources.FindObjectsOfTypeAll<TMP_FontAsset>())
+        {
+            if (asset != null && asset.name.Equals(name, System.StringComparison.OrdinalIgnoreCase))
+            {
+                return asset;
+            }
+        }
+        return null;
     }
 
     /// <summary>Valheim's HUD font while in game, TMP's configured default font otherwise.</summary>
