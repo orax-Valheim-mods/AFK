@@ -29,9 +29,10 @@ disappears the moment the status is released. It is drawn **behind the game's ow
 top of the interface. Its spot is configurable with a nine-point anchor
 (`IndicatorAnchor`, default `TopCenter`) placed at `IndicatorPositionX` /
 `IndicatorPositionY` (percents of the screen, or pixels with `IndicatorPositionUnit`).
-The font comes from `IndicatorFont`: a dropdown of every font the game has loaded, each
-offered as regular / Bold / Italic / Bold Italic (empty = the game's own UI font, in
-bold; the choices are refreshed in the config file each time the game enters a world).
+The font comes from `IndicatorFont` (default `Valheim-AveriaSansLibre Bold`, Valheim's
+own UI font in bold): a dropdown of every font the game has loaded, each offered as
+regular / Bold / Italic / Bold Italic (empty keeps the game's font; the choices are
+refreshed in the config file each time the game enters a world).
 While the request is
 still waiting for the quiet timers, the **same spot** shows the pending message with a
 **live countdown** (`IndicatorShowWaiting`, default on): *"AFK: waiting - no damage dealt,
@@ -64,7 +65,7 @@ announced by a short message in the top left corner (`Notify`).
 | 5 - Display | IndicatorShowWaiting | true | Also show "AFK: waiting - … (12s)" with a live countdown in that same spot while the request waits. |
 | 5 - Display | IndicatorText | AFK | Text of that message (empty = off). |
 | 5 - Display | IndicatorFontSize | 40 | Font size of the message (clamped 8-200). |
-| 5 - Display | IndicatorFont | (empty) | Font of the message: empty = the game's own UI font (bold); otherwise a dropdown of every font the game has loaded, with a regular / Bold / Italic / Bold Italic choice for each (the list fills the config file after a world load). |
+| 5 - Display | IndicatorFont | Valheim-AveriaSansLibre Bold | Font of the message, chosen from a dropdown of every font the game has loaded (a regular / Bold / Italic / Bold Italic choice for each); empty = the game's own UI font. The list fills the config file after a world load. |
 | 5 - Display | IndicatorColor | #FFFFFFFF | Color of the message, HTML hex `#RRGGBB` / `#RRGGBBAA`. |
 | 5 - Display | IndicatorAnchor | TopCenter | Which point of the message sits at the position: TopLeft, TopCenter, TopRight, Left, Center, Right, BottomLeft, BottomCenter, BottomRight. |
 | 5 - Display | IndicatorPositionX | 50 | Horizontal position of that anchor: percent of the screen width (0 = left, 100 = right), or pixels with the Pixels unit. |

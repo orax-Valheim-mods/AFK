@@ -29,6 +29,10 @@ internal static class AfkConfig
     // Highest accepted IndicatorPositionX / IndicatorPositionY (pixels of an 8K screen).
     internal const int MaxScreenCoordinate = 10000;
 
+    // Default IndicatorFont: Valheim's own UI font asset, in bold - the message's
+    // classic look, as an explicit choice instead of an empty value.
+    internal const string DefaultIndicatorFont = "Valheim-AveriaSansLibre Bold";
+
     // Kept for the late IndicatorFont bind: the game's fonts are only known after
     // BepInEx has already called Bind at Awake.
     private static ConfigFile? s_config;
@@ -276,8 +280,9 @@ internal static class AfkConfig
     /// the first frame where the HUD exists): the acceptable values become the config
     /// editor's dropdown - every loaded font, each as regular, Bold, Italic and Bold
     /// Italic - and BepInEx writes them into the config file with the entry, refreshing
-    /// them each session. The empty first value is the default (the game's own UI font)
-    /// and the value any unknown choice clamps back to.
+    /// them each session. The default is Valheim's own UI font in bold
+    /// (DefaultIndicatorFont); the empty first value keeps the game's own font as a
+    /// choice and is the value an unknown choice clamps back to.
     /// </summary>
     internal static void BindIndicatorFont(string[] fontNames)
     {
@@ -318,10 +323,13 @@ internal static class AfkConfig
             }
         }
 
+        // The default must stay a valid choice even if the game ever renames its font.
+        Add(DefaultIndicatorFont);
+
         IndicatorFont = s_config.Bind(
             "5 - Display",
             "IndicatorFont",
-            "",
+            DefaultIndicatorFont,
             new ConfigDescription(
                 "Font of the persistent message. Leave empty to use the game's own UI "
                     + "font, in bold. Otherwise pick one of the fonts the game has loaded "
