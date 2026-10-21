@@ -27,4 +27,5 @@ jobs:
       # team: ${{ vars.HEXIUM_TEAM }}
       # asset: AFK.zip        # optional; defaults to <repo-name>.zip
       # config: hexium.toml   # optional; defaults to hexium.toml when present
-    secrets: inherit
+    secrets:
+      HEXIUM_API_TOKEN: ${{ secrets.HEXIUM_API_TOKEN }}
