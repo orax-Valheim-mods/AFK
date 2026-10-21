@@ -1,6 +1,7 @@
 # Description
 
-AFK adds an **AFK status** you can toggle with a keybind (no key assigned **by default**) or by **sitting down** (the game's `Sit` action). The status is only granted while both quiet conditions
+AFK adds an **AFK status** you can toggle with a keybind (no key assigned **by default**) or by
+**sitting down** (the game's `Sit` action). The status is only granted while both quiet conditions
 hold:
 
 - you have not damaged an enemy for `SecondsSinceDamageDealt` (default 30 s) and
@@ -29,6 +30,10 @@ Install BepInExPack for Valheim. Copy the DLL file to
 # Configuration
 
 `BepInEx\config\orax.AFK.cfg`
+
+# Demo video
+
+[![demo](https://img.youtube.com/vi/h_S3DXPPRK0/0.jpg)](https://youtu.be/h_S3DXPPRK0)
 
 # Misc.
 
