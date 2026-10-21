@@ -27,4 +27,5 @@ jobs:
       mod_id: ${{ vars.NEXUSMODS_MOD_ID }}
       file_id: ${{ vars.NEXUSMODS_FILE_ID }}
       # display_name: dist/AFK  # optional; defaults to dist/<repo-name>
-    secrets: inherit
+    secrets:
+      NEXUSMODS_API_KEY: ${{ secrets.NEXUSMODS_API_KEY }}
