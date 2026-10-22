@@ -36,18 +36,24 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <!-- JotunnLib references UnityEngine.ProfilerModule, which does not exist in this game
-         build (MSB3245). The mod never uses it: drop the reference to keep the build clean. -->
+    <!-- JotunnLib's props declare UnityEngine.ProfilerModule, which does not exist in this
+         game build (MSB3245). The mod never uses it: drop the reference to keep the build
+         clean. -->
     <Reference Remove="UnityEngine.ProfilerModule" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="packages.config" />
     <None Include="README.md" />
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Build-time only: AFK never uses Jotunn at runtime (no BepInDependency, no Jotunn type,
+         and manifest.json depends on BepInExPack alone). The package is still required to
+         COMPILE, because its build/JotunnLibRefsCorlib.props is what declares every reference
+         this project needs - the UnityEngine modules, Unity.TextMeshPro, BepInEx, 0Harmony and
+         the publicized Valheim assemblies - and its JotunnBuildTask publicizes them.
+         Dropping it would leave nothing to compile against. -->
     <PackageReference Include="JotunnLib" Version="2.30.2" />
   </ItemGroup>
 
@@ -63,7 +69,6 @@
     <Copy SourceFiles="$(BEPINEX_PATH)/core/Mono.Cecil.dll" DestinationFolder="$(UNITY_FOLDER)/Assets/Assemblies" />
     <Copy SourceFiles="$(BEPINEX_PATH)/core/MonoMod.Utils.dll" DestinationFolder="$(UNITY_FOLDER)/Assets/Assemblies" />
     <Copy SourceFiles="$(BEPINEX_PATH)/core/MonoMod.RuntimeDetour.dll" DestinationFolder="$(UNITY_FOLDER)/Assets/Assemblies" />
-    <Copy SourceFiles="$(TargetDir)Jotunn.dll" DestinationFolder="$(UNITY_FOLDER)/Assets/Assemblies" />
     <Copy SourceFiles="$(TargetDir)$(TargetName).dll" DestinationFolder="$(UNITY_FOLDER)/Assets/Assemblies" />
     <Copy SourceFiles="$(TargetDir)$(TargetName).pdb" DestinationFolder="$(UNITY_FOLDER)/Assets/Assemblies" />
     <!-- mdb generation doesn't work from portable pdbs, which are the only kind supported under Linux -->
