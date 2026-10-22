@@ -20,7 +20,7 @@ Requires BepInExPack for Valheim.
 
 ## Using a mod manager (recommended)
 
-You can install the mod using Vortex, R2ModMan or Gale.
+You can install the mod using Vortex (nexusmods.com) or Gale (hexium.gg).
 
 ## Manual
 
