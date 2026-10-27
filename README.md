@@ -33,7 +33,7 @@ Install BepInExPack for Valheim. Copy the DLL file to
 
 # Demo video
 
-[![demo](https://img.youtube.com/vi/h_S3DXPPRK0/0.jpg)](https://youtu.be/h_S3DXPPRK0)
+https://youtu.be/h_S3DXPPRK0
 
 # Misc.
 
